@@ -1,0 +1,25 @@
+seed: 42
+min_code_chars: 20
+
+splits:
+  train: 0.8
+  val: 0.1
+  test: 0.1
+
+tfidf:
+  analyzer: char
+  ngram_range: [3, 5]
+  max_features: 100000
+  min_df: 2
+  max_df: 0.95
+
+model:
+  type: logistic_regression
+  class_weight: balanced
+  max_iter: 1000
+  C: 1.0
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  model_dir: models

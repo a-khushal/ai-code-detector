@@ -1,0 +1,22 @@
+# Data and artifacts
+data/raw/
+data/processed/
+models/
+submissions/*.csv
+!submissions/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
