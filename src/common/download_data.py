@@ -8,7 +8,7 @@ from pathlib import Path
 
 from huggingface_hub import hf_hub_download
 
-from src.config import load_config
+from src.common.config import load_config
 
 DATASET_REPO = "OSS-forge/HumanVsAICode"
 FILES = {
@@ -51,11 +51,11 @@ def main() -> None:
         "--config",
         type=str,
         default=None,
-        help="Path to YAML config (defaults to configs/baseline.yaml).",
+        help="Path to YAML config (defaults to configs/data.yaml).",
     )
     args = parser.parse_args()
 
-    config = load_config(args.config)
+    config = load_config(args.config, default_name="data.yaml")
     output_dir: Path = config["paths"]["raw_dir"]
 
     langs = list(FILES) if args.lang == "both" else [args.lang]

@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from src.config import load_config
+from src.common.config import load_config
 
 AI_COLUMNS = {
     "chatgpt": "chatgpt_code",
@@ -170,11 +170,11 @@ def main() -> None:
         "--config",
         type=str,
         default=None,
-        help="Path to YAML config (defaults to configs/baseline.yaml).",
+        help="Path to YAML config (defaults to configs/data.yaml).",
     )
     args = parser.parse_args()
 
-    config = load_config(args.config)
+    config = load_config(args.config, default_name="data.yaml")
     raw_dir: Path = config["paths"]["raw_dir"]
     processed_dir: Path = config["paths"]["processed_dir"]
     splits = config["splits"]
@@ -186,7 +186,7 @@ def main() -> None:
         raw_path = raw_dir / f"{lang}_dataset.jsonl"
         if not raw_path.exists():
             raise FileNotFoundError(
-                f"Missing {raw_path}. Run: python -m src.download_data --lang {lang}"
+                f"Missing {raw_path}. Run: python -m src.common.download_data --lang {lang}"
             )
         process_language(
             raw_path=raw_path,

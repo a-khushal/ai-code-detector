@@ -7,23 +7,13 @@ import json
 from pathlib import Path
 
 import joblib
-import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
-from src.config import load_config
-from src.evaluate import best_threshold_for_macro_f1, print_report
-
-
-def load_split(processed_dir: Path, split: str) -> pd.DataFrame:
-    path = processed_dir / f"{split}.parquet"
-    if not path.exists():
-        raise FileNotFoundError(
-            f"Missing {path}. Run preprocess first, e.g. "
-            f"python -m src.preprocess --lang both"
-        )
-    return pd.read_parquet(path)
+from src.common.config import load_config
+from src.common.data import load_split
+from src.common.evaluate import best_threshold_for_macro_f1, print_report
 
 
 def build_pipeline(config: dict) -> Pipeline:
@@ -42,7 +32,6 @@ def build_pipeline(config: dict) -> Pipeline:
         class_weight=model_cfg.get("class_weight"),
         max_iter=model_cfg.get("max_iter", 1000),
         C=model_cfg.get("C", 1.0),
-        n_jobs=-1,
         random_state=config["seed"],
     )
     return Pipeline(
@@ -60,13 +49,13 @@ def save_artifacts(
     model_dir: Path,
 ) -> None:
     model_dir.mkdir(parents=True, exist_ok=True)
-    joblib.dump(pipeline, model_dir / "baseline_pipeline.joblib")
+    joblib.dump(pipeline, model_dir / "pipeline.joblib")
 
     meta = {
         "threshold": threshold,
         "metrics": metrics,
     }
-    with (model_dir / "baseline_meta.json").open("w", encoding="utf-8") as f:
+    with (model_dir / "meta.json").open("w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2)
 
 
@@ -76,11 +65,11 @@ def main() -> None:
         "--config",
         type=str,
         default=None,
-        help="Path to YAML config (defaults to configs/baseline.yaml).",
+        help="Path to YAML config (defaults to configs/tfidf.yaml).",
     )
     args = parser.parse_args()
 
-    config = load_config(args.config)
+    config = load_config(args.config, default_name="tfidf.yaml")
     processed_dir: Path = config["paths"]["processed_dir"]
     model_dir: Path = config["paths"]["model_dir"]
 
@@ -93,7 +82,7 @@ def main() -> None:
     print(f"Test samples:  {len(test_df):,}")
 
     pipeline = build_pipeline(config)
-    print("Training baseline pipeline (CPU-only) ...")
+    print("Training TF-IDF pipeline (CPU-only) ...")
     pipeline.fit(train_df["code"], train_df["label"])
 
     val_prob = pipeline.predict_proba(val_df["code"])[:, 1]

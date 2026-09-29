@@ -1,0 +1,11 @@
+seed: 42
+min_code_chars: 20
+
+splits:
+  train: 0.8
+  val: 0.1
+  test: 0.1
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed

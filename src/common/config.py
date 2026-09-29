@@ -5,11 +5,11 @@ from typing import Any
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
-def load_config(config_path: str | Path | None = None) -> dict[str, Any]:
-    path = Path(config_path) if config_path else PROJECT_ROOT / "configs" / "baseline.yaml"
+def load_config(config_path: str | Path | None = None, default_name: str = "data.yaml") -> dict[str, Any]:
+    path = Path(config_path) if config_path else PROJECT_ROOT / "configs" / default_name
     with path.open("r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 

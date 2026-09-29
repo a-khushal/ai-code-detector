@@ -1,4 +1,4 @@
-"""Generate binary predictions / submission CSV from a trained baseline."""
+"""Generate binary predictions / submission CSV from a trained TF-IDF model."""
 
 from __future__ import annotations
 
@@ -9,16 +9,16 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
-from src.config import load_config
+from src.common.config import load_config
 
 
 def load_model(model_dir: Path) -> tuple[object, float]:
-    pipeline_path = model_dir / "baseline_pipeline.joblib"
-    meta_path = model_dir / "baseline_meta.json"
+    pipeline_path = model_dir / "pipeline.joblib"
+    meta_path = model_dir / "meta.json"
 
     if not pipeline_path.exists():
         raise FileNotFoundError(
-            f"Missing {pipeline_path}. Run: python -m src.train"
+            f"Missing {pipeline_path}. Run: python -m src.tfidf.train"
         )
 
     pipeline = joblib.load(pipeline_path)
@@ -44,7 +44,7 @@ def predict_dataframe(df: pd.DataFrame, pipeline, threshold: float) -> pd.DataFr
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run inference with the trained baseline.")
+    parser = argparse.ArgumentParser(description="Run inference with the trained TF-IDF model.")
     parser.add_argument(
         "--input",
         type=str,
@@ -54,18 +54,18 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=str,
-        default="submissions/submission.csv",
+        default="submissions/tfidf_submission.csv",
         help="Output CSV path (id, label).",
     )
     parser.add_argument(
         "--config",
         type=str,
         default=None,
-        help="Path to YAML config (defaults to configs/baseline.yaml).",
+        help="Path to YAML config (defaults to configs/tfidf.yaml).",
     )
     args = parser.parse_args()
 
-    config = load_config(args.config)
+    config = load_config(args.config, default_name="tfidf.yaml")
     model_dir: Path = config["paths"]["model_dir"]
     pipeline, threshold = load_model(model_dir)
 

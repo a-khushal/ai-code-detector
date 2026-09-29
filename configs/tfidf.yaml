@@ -22,4 +22,4 @@ model:
 paths:
   raw_dir: data/raw
   processed_dir: data/processed
-  model_dir: models
+  model_dir: models/tfidf
