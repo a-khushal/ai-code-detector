@@ -37,6 +37,20 @@ python -m src.tfidf.predict \
   --output submissions/tfidf_submission.csv
 ```
 
+## CodeBERT (GPU)
+
+```bash
+pip install -r requirements-codebert.txt
+
+# Train (defaults to 50k train samples — edit configs/codebert.yaml for full data)
+python -m src.codebert.train
+
+# Predict / submission
+python -m src.codebert.predict \
+  --input data/processed/test.parquet \
+  --output submissions/codebert_submission.csv
+```
+
 ## Kaggle notebook
 
 ```python
@@ -45,11 +59,16 @@ python -m src.tfidf.predict \
 %cd ai-code-detector
 !pip install -r requirements.txt
 
-# Full pipeline
+# TF-IDF pipeline
 !python -m src.common.download_data --lang both
 !python -m src.common.preprocess --lang both
 !python -m src.tfidf.train
 !python -m src.tfidf.predict --input data/processed/test.parquet --output submissions/tfidf_submission.csv
+
+# CodeBERT (Session options → GPU ON)
+!pip install -r requirements-codebert.txt
+!python -m src.codebert.train
+!python -m src.codebert.predict --input data/processed/test.parquet --output submissions/codebert_submission.csv
 ```
 
 ## Score submission locally
@@ -72,3 +91,4 @@ print(classification_report(merged["label_true"], merged["label_pred"], target_n
 |------|---------|
 | `configs/data.yaml` | download, preprocess |
 | `configs/tfidf.yaml` | TF-IDF train/predict |
+| `configs/codebert.yaml` | CodeBERT train/predict |

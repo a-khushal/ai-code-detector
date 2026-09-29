@@ -15,10 +15,10 @@ pip install -r requirements.txt
 ```
 src/common/      download, preprocess, evaluate (shared)
 src/tfidf/       TF-IDF + Logistic Regression (CPU)
-src/codebert/    reserved for later
-configs/         data.yaml, tfidf.yaml
+src/codebert/    CodeBERT fine-tuning (GPU)
+configs/         data.yaml, tfidf.yaml, codebert.yaml
 models/tfidf/    TF-IDF artifacts
-models/codebert/ reserved for later
+models/codebert/ CodeBERT checkpoints
 ```
 
 See `COMMANDS.md` for all run commands.
