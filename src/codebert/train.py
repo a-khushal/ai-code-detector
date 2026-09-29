@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from sklearn.metrics import f1_score
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
+    DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
 )
@@ -117,14 +119,21 @@ def main() -> None:
         preds = np.argmax(logits, axis=-1)
         return {"macro_f1": float(f1_score(labels, preds, average="macro"))}
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=val_dataset,
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
-    )
+    trainer_kwargs = {
+        "model": model,
+        "args": training_args,
+        "train_dataset": train_dataset,
+        "eval_dataset": val_dataset,
+        "data_collator": DataCollatorWithPadding(tokenizer=tokenizer),
+        "compute_metrics": compute_metrics,
+    }
+    trainer_params = inspect.signature(Trainer.__init__).parameters
+    if "processing_class" in trainer_params:
+        trainer_kwargs["processing_class"] = tokenizer
+    elif "tokenizer" in trainer_params:
+        trainer_kwargs["tokenizer"] = tokenizer
+
+    trainer = Trainer(**trainer_kwargs)
 
     print(f"Training CodeBERT ({model_name}) ...")
     trainer.train()
