@@ -41,6 +41,24 @@ def build_dataset(df: pd.DataFrame, tokenizer, max_length: int) -> Dataset:
     return dataset.map(tokenize, batched=True, remove_columns=["code"])
 
 
+def resolve_resume_checkpoint(model_dir: Path, resume: str | None) -> str:
+    if resume and resume != "auto":
+        path = Path(resume)
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+        return str(path)
+
+    checkpoints = sorted(
+        model_dir.glob("checkpoint-*"),
+        key=lambda p: int(p.name.rsplit("-", 1)[-1]),
+    )
+    if not checkpoints:
+        raise FileNotFoundError(f"No checkpoints found in {model_dir}")
+    latest = checkpoints[-1]
+    print(f"Resuming from latest checkpoint: {latest}")
+    return str(latest)
+
+
 def save_meta(model_dir: Path, threshold: float, metrics: dict, config: dict) -> None:
     meta = {
         "threshold": threshold,
@@ -58,6 +76,14 @@ def main() -> None:
         type=str,
         default=None,
         help="Path to YAML config (defaults to configs/codebert.yaml).",
+    )
+    parser.add_argument(
+        "--resume",
+        nargs="?",
+        const="auto",
+        default=None,
+        metavar="CHECKPOINT",
+        help="Resume training from a checkpoint (default: latest in model_dir).",
     )
     args = parser.parse_args()
 
@@ -135,8 +161,9 @@ def main() -> None:
 
     trainer = Trainer(**trainer_kwargs)
 
+    resume_from = resolve_resume_checkpoint(model_dir, args.resume) if args.resume else None
     print(f"Training CodeBERT ({model_name}) ...")
-    trainer.train()
+    trainer.train(resume_from_checkpoint=resume_from)
     trainer.save_model(model_dir)
     tokenizer.save_pretrained(model_dir)
 

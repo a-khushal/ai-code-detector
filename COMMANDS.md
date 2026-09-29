@@ -45,6 +45,9 @@ pip install -r requirements-codebert.txt
 # Train (defaults to 50k train samples — edit configs/codebert.yaml for full data)
 python -m src.codebert.train
 
+# Resume from latest checkpoint (after a interrupted run)
+python -m src.codebert.train --resume
+
 # Predict / submission
 python -m src.codebert.predict \
   --input data/processed/test.parquet \
@@ -68,6 +71,7 @@ python -m src.codebert.predict \
 # CodeBERT (Session options → GPU ON)
 !pip install -r requirements-codebert.txt
 !python -m src.codebert.train
+# if interrupted: !python -m src.codebert.train --resume
 !python -m src.codebert.predict --input data/processed/test.parquet --output submissions/codebert_submission.csv
 ```
 
